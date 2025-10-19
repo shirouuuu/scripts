@@ -36,6 +36,8 @@ title()   { printf "\n%b%s%b\n" "${MAGENTA}${BOLD}" "$*" "${RESET}"; }
 
 title "Starting macOS setup"
 
+sudo xcodebuild -license accept
+
 # Check for Homebrew to be present, install if it's missing
 if ! command -v brew >/dev/null 2>&1; then
     info "Homebrew not found — installing..."
@@ -57,7 +59,7 @@ brew update || warn "brew update exited with non-zero status"
 # Install packages
 PACKAGES=(
     python@3.13
-    taiscale
+    tailscale
     cocoapods
     git
     ruby
@@ -92,6 +94,7 @@ CASKS=(
     openvpn-connect
     windows-app
     utm
+    visual-studio-code
 
     # Design & Kreativität
     figma
@@ -116,66 +119,12 @@ CASKS=(
     keka
     logi-options+
     jordanbaird-ice
-    caffeine
     appcleaner
     chatgpt
     zen
     google-chrome
-)
-info "Installing cask apps..."
-CASKS=(
-  # Produktivität & Organisation
-  1password
-  notion
-  readdle-spark
-  ticktick
-  microsoft-excel
-  microsoft-word
-  microsoft-powerpoint
-  obsidian
-  raycast
-  applite
-
-  # Entwicklung
-  android-studio
-  jetbrains-toolbox
-  postman
-  github
-  docker-desktop
-  textmate
-  lm-studio
-  openvpn-connect
-  windows-app
-  utm
-
-  # Design & Kreativität
-  figma
-
-  # Kommunikation & Zusammenarbeit
-  discord
-  mattermost
-  slack
-  whatsapp
-  zoom
-
-  # Medien & Unterhaltung
-  spotify
-  iina
-  steam
-
-  # System & Dienstprogramme
-  iterm2
-  monitorcontrol
-  rectangle
-  shottr
-  keka
-  logi-options+
-  jordanbaird-ice
-  caffeine
-  appcleaner
-  chatgpt
-  zen
-  google-chrome
+    tailscale-app
+    domzilla-caffeine
 )
 info "Installing cask apps..."
 brew install --cask ${CASKS[@]} || warn "Some cask installs exited non-zero — check output above"
@@ -190,6 +139,9 @@ APP_STORE_APPS=(
     1444383602 # GoodNotes 6
 )
 mas install ${APP_STORE_APPS[@]} || warn "mas install had issues; ensure you're signed in to the App Store"
+
+sudo xcodebuild -runFirstLaunch
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 info "Downloading Xcode iOS platform simulators (Rosetta/universal)"
 xcodebuild -downloadPlatform iOS -architectureVariant universal || warn "xcodebuild simulator download may have failed or requires Xcode license acceptance"
@@ -209,6 +161,34 @@ defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 # Set dock animation speed to fast
 info "Setting Dock autohide animation speed"
 defaults write com.apple.dock autohide-time-modifier -float 0.25; killall Dock
+
+##todo add outputs
+# icon size dock 
+defaults write com.apple.dock "tilesize" -int "48" && killall Dock
+
+# auto hide dock 
+defaults write com.apple.dock "autohide" -bool "true" && killall Dock
+
+# autohide delay 
+defaults write com.apple.dock "autohide-delay" -float "0" && killall Dock
+
+# show recents in dock false
+defaults write com.apple.dock "show-recents" -bool "false" && killall Dock
+
+#finder set path bar
+defaults write com.apple.finder "ShowPathbar" -bool "true" && killall Finder
+
+#finder column view default 
+defaults write com.apple.finder "FXPreferredViewStyle" -string "clmv" && killall Finder
+
+#folders on top when sorting by name 
+defaults write com.apple.finder "_FXSortFoldersFirst" -bool "true" && killall Finder
+
+# disable mouse accerleration
+defaults write NSGlobalDomain com.apple.mouse.linear -bool "true"
+
+#enable three finger drag 
+defaults write com.apple.AppleMultitouchTrackpad "TrackpadThreeFingerDrag" -bool "true"
 
 success "macOS setup completed!"
 
